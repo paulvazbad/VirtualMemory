@@ -2,14 +2,14 @@ class Process():
     def __init__(self,id,size, time):
         super().__init__()
         self.id = id
-        self.size = size
+        self.size = size    #in bytes
         self.timestamp = time
         self.table = {}
         self.page_faults = 0
     
     def insert_page(self,page):
         if(self.table[page.id] == None):
-            print("Page Fault" + self.id +" " +page.id)
+            print("Page Fault" + self.id + " " + page.id)
             self.table[page.id] = page
         else:
             print("ERROR: Page already defined")

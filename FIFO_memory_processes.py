@@ -19,7 +19,7 @@ SIZE_OF_PAGE = 16
 
 
 # Add the page to memory (swap or insert)
-def add_page_to_memory(new_process,page_number):
+def add_page_to_memory(new_process, page_number):
     # Check available frames
     if memory_available(M) <= 0:
         # Swap
@@ -35,7 +35,8 @@ def add_page_to_memory(new_process,page_number):
         # Create page object
         new_page = Page(page_number, new_frame, 1)
         # Insert into process tabe
-        new_process.insert_page(new_page)
+        processes[new_process].insert_page(new_page)
+        fifo.insert(new_process, page_number)
 
 def swap(process_to_insert_ID, process_to_insert_page_number):
     process_to_switch_ID, process_to_switch_page_number = fifo.front()
@@ -64,17 +65,36 @@ def P(number_of_bytes,process_id,time):
     print("Asks for memory")
 
 def A(virtual_address, process_ID, modify):
-    #validar si existe la dirección de memoria
+    #Validates if virtual address exists
+    if (virtual_address > processes[process_ID].size or virtual_address < 0):
+        raise Exception("The virual address is not valid.")
+
     print("A " + virtual_address + " " + process_ID + " " + modify)
-    page = processes[process_ID].table[virtual_address/processes[process_ID].size]
+    #Gets page to modify
+    page = processes[process_ID].table[virtual_address % SIZE_OF_PAGE]
 
     if page.bit_memory:
-        return page.frame + virtual_address%processes[process_ID].size
+        return page.frame + virtual_address % SIZE_OF_PAGE
     else:
         processes[process_ID].page_faults += 1
         print("Memoria en S: " + page.frame)
-        swap(process_ID, page)
-        print("Memoria actual en M: " + processes[process_ID].table[virtual_address/processes[process_ID].size].frame)
+        #Swaps if there are no spaces available in M
+        if memory_available(M) == 0:
+            swap(process_ID, page)
+        # Inserts into M
+        else:
+            new_frame = -1
+            for memory in M:
+                if memory == 0:
+                    memory = [process_ID, page.ID]
+                    new_frame = memory.index
+                    break
+            #Changes page characteristics in processes
+            processes[process_ID].tabe[page.ID].frame = new_frame
+            processes[process_ID].tabe[page.ID].bit_memory = 1
+            fifo.insert(process_ID, page.ID)
+
+        print("Memoria actual en M: " + (processes[process_ID].table[page.ID].frame + virtual_address % SIZE_OF_PAGE))
     return 0
 
 #Frees all the pages of a process
