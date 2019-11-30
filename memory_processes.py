@@ -12,6 +12,7 @@ S = np.zeros(256)
 lru = LRU()
 fifo = FIFO()
 global_time = 0
+logs = []
 #Instances of process
 processes = {}
 SIZE_OF_PAGE = 16
@@ -48,6 +49,8 @@ def P(number_of_bytes,process_id,time):
 def L(process_id):
     # Iterate in the process.table
     process = processes[process_id]
+    if (process == None):
+        raise Exception("Process id not found")
     reales_liberados = []
     swapping_liberados = []
     for page in process:
@@ -67,9 +70,14 @@ def L(process_id):
         print("Se liberan los marcos de memoria real:" + str(reales_liberados))
     if(len(swapping_liberados)>0):
         print("Se liberan los marcos de swapping"+ str(swapping_liberados))
+    
+    turnaround = global_time - process.timestamp
+    #Add to logs the information regarding the process
+    log_string = "Process: " + str(process_id) +  "Turnaround: " + str(turnaround) + "Page faults: "+str(process.page_faults)
+    logs.append(log_string)
     # Delete process from list of processes
     del processes[process_id]
-    
+
 #Returns the number of non-zero elements in memory (# of pages)
 def memory_available(memory):
     return len(memory) - np.count_nonzero(memory)

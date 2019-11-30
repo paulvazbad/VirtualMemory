@@ -4,10 +4,12 @@ class FIFO():
         self.list = []
     
     def pop(self):
-        return self.list.pop(0)
+        process_id, page_id = self.list.pop(0)
+        return process_id,page_id
     
     def front(self):
-        return self.list.pop(0)
+        process_id, page_id = self.list.pop(0)
+        return process_id,page_id
 
     def insert(self,process_id,page_id):
         self.list.append([process_id,page_id])
