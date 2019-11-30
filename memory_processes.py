@@ -20,16 +20,34 @@ SIZE_OF_PAGE = 16
 
 # Add the page to memory (swap or insert)
 def add_page_to_memory(new_process,page_number):
+    # Check available frames
+    if memory_available(M) <= 0:
+        # Swap
+        swap(new_process, page_number)
+    else:
+        # Insert
+        new_frame = -1
+        for memory in M:
+            if memory == 0:
+                memory = [new_process, page_number]
+                new_frame = memory.index
+                break
+        # Create page object
+        new_page = Page(page_number, new_frame, 1)
+        # Insert into process tabe
+        new_process.insert_page(new_page)
 
-    # Check frames available
-    # Swap or insert
-    # Create page object
-    frame = 22132321312322312 # Here goes the frame where it is
-    new_page = Page(page_number,frame,1)
-    # Insert into process tabe
-    new_process.insert_page(new_page)
-
-
+def swap(process_to_insert_ID, process_to_insert_page_number):
+    process_to_switch_ID, process_to_switch_page_number = fifo.front()
+    #inserts process into main memory
+    fifo.insert(process_to_insert_ID, process_to_insert_page_number)
+    #updates process table of inserted page
+    processes[process_to_insert_ID].table[process_to_insert_page_number].bit_memory = 1
+    S_frame = processes[process_to_insert_ID].table[process_to_insert_page_number].frame
+    processes[process_to_insert_ID].table[process_to_insert_page_number].frame = processes[process_to_switch_ID].table[process_to_switch_page_number].frame
+    #updates process table of switched page
+    processes[process_to_switch_ID].table[process_to_switch_page_number].frame = S_frame
+    processes[process_to_switch_ID].table[process_to_switch_page_number].bit_memory = 0
 
 # Ask for N-bytes in memory
 def P(number_of_bytes,process_id,time):
@@ -44,6 +62,20 @@ def P(number_of_bytes,process_id,time):
     #Add process to list of processes
     processes[process_id] = new_process
     print("Asks for memory")
+
+def A(virtual_address, process_ID, modify):
+    #validar si existe la dirección de memoria
+    print("A " + virtual_address + " " + process_ID + " " + modify)
+    page = processes[process_ID].table[virtual_address/processes[process_ID].size]
+
+    if page.bit_memory:
+        return page.frame + virtual_address%processes[process_ID].size
+    else:
+        processes[process_ID].page_faults += 1
+        print("Memoria en S: " + page.frame)
+        swap(process_ID, page)
+        print("Memoria actual en M: " + processes[process_ID].table[virtual_address/processes[process_ID].size].frame)
+    return 0
 
 #Frees all the pages of a process
 def L(process_id):
