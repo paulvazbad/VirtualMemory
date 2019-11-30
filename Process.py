@@ -1,8 +1,9 @@
 class Process():
-    def __init__(self,id,size):
+    def __init__(self,id,size, time):
         super().__init__()
         self.id = id
         self.size = size
+        self.timestamp = time
         self.table = {}
     
     def insert_page(self,page):

@@ -11,7 +11,7 @@ M = np.zeros(128)
 S = np.zeros(256)
 lru = LRU()
 fifo = FIFO()
-
+global_time = 0
 #Instances of process
 processes = {}
 SIZE_OF_PAGE = 16
@@ -31,9 +31,11 @@ def add_page_to_memory(new_process,page_number):
 
 
 # Ask for N-bytes in memory
-def P(number_of_bytes,process_id):
+def P(number_of_bytes,process_id,time):
+    if(number_of_bytes > 2048):
+        raise Exception("Memory requested is too big, limit (2048)")
     number_of_pages  = math.ceil(number_of_bytes/SIZE_OF_PAGE) 
-    new_process = Process(process_id,number_of_bytes)
+    new_process = Process(process_id,number_of_bytes, time)
     #Create each page for the process
     for i in range(0,number_of_pages):
         add_page_to_memory(new_process,i)
