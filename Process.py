@@ -5,6 +5,7 @@ class Process():
         self.size = size
         self.timestamp = time
         self.table = {}
+        self.page_faults = 0
     
     def insert_page(self,page):
         if(self.table[page.id] == None):

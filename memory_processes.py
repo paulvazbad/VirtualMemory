@@ -44,8 +44,32 @@ def P(number_of_bytes,process_id,time):
     processes[process_id] = new_process
     print("Asks for memory")
 
-
-
+#Frees all the pages of a process
+def L(process_id):
+    # Iterate in the process.table
+    process = processes[process_id]
+    reales_liberados = []
+    swapping_liberados = []
+    for page in process:
+        #Deletes the page
+        frame = page.frame
+        bit_memory = page.bit_memory
+        if(bit_memory==1):
+            #Delete from M
+            M[frame] = 0
+            reales_liberados.append(frame)
+        else:
+            #Delete from S
+            S[frame] = 0 
+            swapping_liberados.append(frame)
+        global_time += 0.1
+    if(len(reales_liberados)>0):
+        print("Se liberan los marcos de memoria real:" + str(reales_liberados))
+    if(len(swapping_liberados)>0):
+        print("Se liberan los marcos de swapping"+ str(swapping_liberados))
+    # Delete process from list of processes
+    del processes[process_id]
+    
 #Returns the number of non-zero elements in memory (# of pages)
 def memory_available(memory):
     return len(memory) - np.count_nonzero(memory)
