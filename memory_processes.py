@@ -82,6 +82,30 @@ def L(process_id):
 def memory_available(memory):
     return len(memory) - np.count_nonzero(memory)
 
+#Prints OUTPUT and resets everything
+def F():
+    global logs
+    global M
+    global S
+    global lru
+    global fifo
+    global global_time
+    global logs
+    global processes
+    global  SIZE_OF_PAGE
+    #Instances of process
+    processes = {}
+    SIZE_OF_PAGE = 16
+    for log in logs:
+        print(log)
+
+    #resets everything
+    M = np.zeros(128)
+    S = np.zeros(256)
+    lru = LRU()
+    fifo = FIFO()
+    global_time = 0
+    logs = []
 
 
 ##Read from file 
