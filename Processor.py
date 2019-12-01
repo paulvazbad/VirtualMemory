@@ -39,21 +39,40 @@ def add_page_to_memory(new_process, page_number):
                 break
         # Create page object
         new_page_obj = Page(page_number, new_frame, 1)
-        # Insert into process tabe
+        # Insert into process table
         processes[new_process].insert_page(new_page_obj)
         algorithm[PAGE_REPLACEMENT_ALGORITHM].insert(new_process, page_number)
 
 def swap(process_to_insert_ID, process_to_insert_page_number):
+    #gets process to switch with
     process_to_switch_ID, process_to_switch_page_number =  algorithm[PAGE_REPLACEMENT_ALGORITHM].pop()
-    #inserts process into main memory
-    algorithm[PAGE_REPLACEMENT_ALGORITHM].insert(process_to_insert_ID, process_to_insert_page_number)
-    #updates process table of inserted page
+    S_frame = -1
+    #If process needs to switch from S to M
+    if process_to_insert_page_number in processes[process_to_insert_ID].table:
+        S_frame = processes[process_to_insert_ID].table[process_to_insert_page_number].frame
+    #If it is a new page/process
+    else:
+        S_frame = -1
+        for index, memory in enumerate(S):
+            if memory == [-1,-1]:
+                S_frame = index
+                break
+        # Create default page object
+        new_page_obj = Page(process_to_insert_page_number, -1, -1)
+        # Insert into process table
+        processes[process_to_insert_ID].insert_page(new_page_obj)
+    page_to_S = processes[process_to_switch_ID].table[process_to_switch_page_number]
+    ##inserts new/needed process into main memory and algorithm
+    processes[process_to_insert_ID].table[process_to_insert_page_number].frame = page_to_S.frame
     processes[process_to_insert_ID].table[process_to_insert_page_number].bit_memory = 1
-    S_frame = processes[process_to_insert_ID].table[process_to_insert_page_number].frame
-    processes[process_to_insert_ID].table[process_to_insert_page_number].frame = processes[process_to_switch_ID].table[process_to_switch_page_number].frame
+    algorithm[PAGE_REPLACEMENT_ALGORITHM].insert(process_to_insert_ID, process_to_insert_page_number)
     #updates process table of switched page
     processes[process_to_switch_ID].table[process_to_switch_page_number].frame = S_frame
     processes[process_to_switch_ID].table[process_to_switch_page_number].bit_memory = 0
+    #updates S memory
+    S[S_frame] = [process_to_switch_ID, page_to_S.ID]
+    print("Página", process_to_switch_page_number, "del proceso", process_to_switch_ID, "swappeada al marco", S_frame, "del área de swapping")
+    
 
 # Ask for N-bytes in memory
 def P(number_of_bytes,process_id,time):
@@ -69,25 +88,26 @@ def P(number_of_bytes,process_id,time):
     #Add process to list of processes
     processes[process_id] = new_process
     print("Asks for memory")
-    print(M)
 
 def A(virtual_address, process_ID, modify):
     #Validates if virtual address exists
     if (virtual_address > processes[process_ID].size or virtual_address < 0):
         raise Exception("The virual address is not valid.")
-
     print("A", virtual_address, process_ID, modify)
-    #Gets page to modify
-    page = processes[process_ID].table[virtual_address % SIZE_OF_PAGE]
-
+    #Gets page to execute
+    page = processes[process_ID].table[int(virtual_address / SIZE_OF_PAGE)]
+    if modify == 1:
+        algorithm[PAGE_REPLACEMENT_ALGORITHM].touch(process_ID,page.ID)
+        print("Página", int(virtual_address / SIZE_OF_PAGE), "del proceso", process_ID, "modificada.")
+    print("Dirección virtual:", virtual_address)
     if page.bit_memory:
-        return page.frame + virtual_address % SIZE_OF_PAGE
+        print("Dirección real (M):", (page.frame * SIZE_OF_PAGE + virtual_address % SIZE_OF_PAGE))
     else:
         processes[process_ID].page_faults += 1
         print("Memoria en S:", page.frame)
         #Swaps if there are no spaces available in M
         if memory_available(M) == 0:
-            swap(process_ID, page)
+            swap(process_ID, page.ID)
         # Inserts into M
         else:
             new_frame = -1
@@ -100,8 +120,7 @@ def A(virtual_address, process_ID, modify):
             processes[process_ID].tabe[page.ID].frame = new_frame
             processes[process_ID].tabe[page.ID].bit_memory = 1
             algorithm[PAGE_REPLACEMENT_ALGORITHM].insert(process_ID, page.ID)
-
-        print("Memoria actual en M:", (processes[process_ID].table[page.ID].frame + virtual_address % SIZE_OF_PAGE))
+        print("Dirección real (M):", (processes[process_ID].table[page.ID].frame + virtual_address % SIZE_OF_PAGE))
     return 0
 
 #Frees all the pages of a process
@@ -175,6 +194,5 @@ def debug_status(process_id):
     
     if process_id in processes:
         print("Process memory of", process_id, ":")
-        for index, page in enumerate(processes[process_id].table):
-            print (index, page)
+        processes[process_id].print_pages()
 

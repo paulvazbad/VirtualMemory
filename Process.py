@@ -24,6 +24,6 @@ class Process():
     def print_pages(self):
         print("page_id" +" | "+"Frame"+" | "+"Bit")
         for page in self.table.items():
-            print(page.ID + " | " + page.frame + " | " + page.bit_memory)
+            print(page[1].ID, " | ", page[1].frame, " | ", page[1].bit_memory)
         
     
