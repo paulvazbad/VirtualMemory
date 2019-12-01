@@ -5,7 +5,7 @@ class FIFO():
     
     def pop(self):
         process_id, page_id = self.list.pop(0)
-        return process_id,page_id
+        return process_id, page_id
 
     def insert(self,process_id,page_id):
         self.list.append([process_id,page_id])
