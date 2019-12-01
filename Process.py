@@ -2,9 +2,9 @@ class Process():
     def __init__(self,id,size, time):
         super().__init__()
         self.id = id
-        self.size = size    #in bytes
+        self.size = size        #in bytes
         self.timestamp = time
-        self.table = {}
+        self.table = {}         #stores pages
         self.page_faults = 0
     
     def insert_page(self,page):
