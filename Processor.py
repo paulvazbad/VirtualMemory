@@ -1,3 +1,4 @@
+import collections
 import numpy as np
 import math
 from LRU import LRU 
@@ -7,8 +8,8 @@ from Process import Process
 
 #Global Variables
 
-M = np.zeros(128)
-S = np.zeros(256)
+M = [[-1,-1]]*128
+S = [[-1,-1]]*256
 lru = LRU()
 fifo = FIFO()
 global_time = 0
@@ -17,7 +18,7 @@ debug = False
 
 #Instances of process
 processes = {}
-algorithm = [lru, fifo]
+algorithm = [fifo, lru]
 SIZE_OF_PAGE = 16
 PAGE_REPLACEMENT_ALGORITHM = 0
 
@@ -31,15 +32,15 @@ def add_page_to_memory(new_process, page_number):
     else:
         # Insert
         new_frame = -1
-        for memory in M:
-            if memory == 0:
-                memory = [new_process, page_number]
-                new_frame = memory.index
+        for index, memory in enumerate(M):
+            if memory == [-1,-1]:
+                M[index] = [new_process, page_number]
+                new_frame = index
                 break
         # Create page object
-        new_page = Page(page_number, new_frame, 1)
+        new_page_obj = Page(page_number, new_frame, 1)
         # Insert into process tabe
-        processes[new_process].insert_page(new_page)
+        processes[new_process].insert_page(new_page_obj)
         algorithm[PAGE_REPLACEMENT_ALGORITHM].insert(new_process, page_number)
 
 def swap(process_to_insert_ID, process_to_insert_page_number):
@@ -60,13 +61,15 @@ def P(number_of_bytes,process_id,time):
         raise Exception("Memory requested is too big, limit (2048)")
     number_of_pages  = math.ceil(number_of_bytes/SIZE_OF_PAGE) 
     new_process = Process(process_id,number_of_bytes, time)
+    processes[process_id] = new_process
     #Create each page for the process
     for i in range(0,number_of_pages):
-        add_page_to_memory(new_process,i)
+        add_page_to_memory(process_id,i)
 
     #Add process to list of processes
     processes[process_id] = new_process
     print("Asks for memory")
+    print(M)
 
 def A(virtual_address, process_ID, modify):
     #Validates if virtual address exists
@@ -89,7 +92,7 @@ def A(virtual_address, process_ID, modify):
         else:
             new_frame = -1
             for memory in M:
-                if memory == 0:
+                if memory == [-1, -1]:
                     memory = [process_ID, page.ID]
                     new_frame = memory.index
                     break
@@ -115,11 +118,11 @@ def L(process_id):
         bit_memory = page.bit_memory
         if(bit_memory==1):
             #Delete from M
-            M[frame] = 0
+            M[frame] = [-1, -1]
             reales_liberados.append(frame)
         else:
             #Delete from S
-            S[frame] = 0 
+            S[frame] = [-1, -1] 
             swapping_liberados.append(frame)
         global_time += 0.1
     if(len(reales_liberados)>0):
@@ -136,7 +139,7 @@ def L(process_id):
 
 #Returns the number of non-zero elements in memory (# of pages)
 def memory_available(memory):
-    return len(memory) - np.count_nonzero(memory)
+    return sum(-1 in item for item in memory) 
 
 #Prints OUTPUT and resets everything
 def F():
@@ -170,9 +173,8 @@ def debug_status(process_id):
     print("Memoria M:", memory_available(M))
     print("Memoria S:", memory_available(S))
     
-    if memory_available(processes) > 0:
-        print("Process memory:")
-        for page in processes[process_id].table:
-            if page:
-                print (page.ID, page.frame, page.bit_memory)
+    if process_id in processes:
+        print("Process memory of", process_id, ":")
+        for index, page in enumerate(processes[process_id].table):
+            print (index, page)
 
