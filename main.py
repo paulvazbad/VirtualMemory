@@ -11,6 +11,9 @@ import Processor as Processor
 
 #Main program
 f = open("program_commands.txt", "r")
+# PAGE_REPLACEMENT_ALGORITHM 1 for LRU
+# PAGE_REPLACEMENT_ALGORITHM 0 for FIFO
+Processor.PAGE_REPLACEMENT_ALGORITHM = 1
 if f.mode == 'r':
     lines = f.readlines()
     for line in lines:
@@ -54,7 +57,7 @@ f.close()
 # Processor.debug_status(1)
 
 #LRU
-# Processor.PAGE_REPLACEMENT_ALGORITHM = 1
+# 
 # Processor.P(2048, 1)
 # Processor.A(1,1,1)
 # Processor.P(33, 2)

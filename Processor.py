@@ -81,6 +81,7 @@ def add_page_to_memory(new_process, page_number):
     #adds 1 sec to global time for adding page to M
     global_time += 10
 
+#Swaps 2 processes from real and swapping memory
 def swap(process_to_insert_ID, process_to_insert_page_number):
     global global_time
     global swaps
@@ -90,6 +91,8 @@ def swap(process_to_insert_ID, process_to_insert_page_number):
     #If process needs to switch from S to M
     if process_to_insert_page_number in processes[process_to_insert_ID].table:
         S_frame = processes[process_to_insert_ID].table[process_to_insert_page_number].frame
+        swaps += 1
+        processes[process_to_insert_ID].page_faults += 1
     #If it is a new page/process
     else:
         S_frame = -1
@@ -116,9 +119,7 @@ def swap(process_to_insert_ID, process_to_insert_page_number):
     print("Página", process_to_insert_page_number, "del proceso", process_to_insert_ID, "swappeada al marco", processes[process_to_insert_ID].table[process_to_insert_page_number].frame, "del área real")
     print("Página", process_to_switch_page_number, "del proceso", process_to_switch_ID, "swappeada al marco", S_frame, "del área de swapping")
     #adds 1 sec to global timer because of the extra operation of swapping out "process_to_switch"
-    processes[process_to_insert_ID].page_faults += 1
     global_time += 10
-    swaps += 1
     
 # Ask for N-bytes in memory
 def P(number_of_bytes, process_id):
