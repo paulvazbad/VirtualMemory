@@ -1,5 +1,6 @@
 C archivo de prueba para FIFO, LRU
-P 32 2             
+P 32 2  
+P 44 2           
 P 48 3             
 P 63 4             
 L 3                   

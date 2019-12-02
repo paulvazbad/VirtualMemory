@@ -1,3 +1,12 @@
+"""
+Clase que simula un proceso.
+Atributos:
+- id: identificador único de proceso
+- table: diccionario de páginas 
+- size: tamaño del proceso en bytes
+- timestamp: tiempo en el que se creó el proceso
+"""
+
 class Process():
     def __init__(self,id,size, time):
         super().__init__()

@@ -1,7 +1,9 @@
 """
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Trabajo final SO
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Aurora Tijerina Berzosa     A01196690
-Paul Vazquez Badillo        A0
+Paul Vazquez Badillo        A00819877
 Miguel Morales de la Vega	A00821541
 """
 
@@ -25,10 +27,12 @@ if f.mode == 'r':
             elif command[0] == "F":
                 Processor.F()
             elif command[0] == "E":
+                print("Fin del programa.")
                 break
         except:
             print("Comando no válido")
             print()
+f.close()
     
 
 #FIFO

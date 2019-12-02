@@ -1,3 +1,29 @@
+"""
+El procesador del programa que aplica el algoritmo de reemplazo de páginas.
+
+Atributos:
+- M: memoria real (128 páginas)
+- S: memoria de swapping (256 páginas)
+- lru, fifo: organizadores de prioridades de páginas
+- global time: tiempo de ejecución
+- 
+
+Funciones de comandos:
+- C(comentario): imprime el comentario
+- P(tamaño, proceso): Cargar el proceso
+- A(dirección virtual, proceso, modificación): Obtener dirección real/modificar
+- L(proceso): Liberar memoria de un proceso en específico
+- F(): Reinicializa el programa y despliega las estadísticas del procesamiento
+- E(): Finalizar programa
+
+Funciones de apoyo:
+- add_page_to_memory(process, page)
+- swap: intercambia una página de la memoria S con una página de la memoria M
+- debug_status(): imprime el estatus de todos los atributos
+- processes: diccionario de procesos
+- algoritmo: lista de algoritmos de prioridad disponibles
+"""
+
 import collections
 import numpy as np
 import math
@@ -98,10 +124,13 @@ def swap(process_to_insert_ID, process_to_insert_page_number):
 def P(number_of_bytes, process_id):
     print("P", number_of_bytes, process_id)
     if(number_of_bytes > 2048):
-        print("Proceso excede el limite de tamaño (2048 bytes)")
+        print("Proceso excede el limite de tamaño (2048 bytes).")
         print()
     elif(number_of_bytes > (memory_available(M) + memory_available(S))*16):
         print("Memoria insuficiente; puede liberar espacio quitando un proceso.")
+        print()
+    elif(process_id in processes.keys()):
+        print("Proceso ya definido.")
         print()
     else:
         #Add process to list of processes
@@ -241,6 +270,7 @@ def debug_status():
     print(M)
     print("Memoria S:", memory_available(S))
     print(S)
+    print("Global time:", global_time)
     
     for process in processes:
         print("Memory of process", process.id, ":")
