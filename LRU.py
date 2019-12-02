@@ -20,6 +20,16 @@ class LRU():
     
     def pop(self):
         return self.list.pop()
+
+    def delete_process(self,process_id):
+        indexes_to_delete = []
+        counter = 0
+        for index in range(len(self.list)):
+            if self.list[index][0] == process_id:
+                indexes_to_delete.append(index - counter)
+                counter += 1
+        for index in indexes_to_delete:
+                self.list.pop(index)
     
     def insert(self,process_id,page_id):
         self.list.insert(0,[process_id,page_id])
