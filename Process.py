@@ -9,7 +9,6 @@ class Process():
     
     def insert_page(self,page):
         if(self.table.get(page.ID, None) == None):
-            print("Page Fault", self.id, page.ID)
             self.table[page.ID] = page
         else:
             print("ERROR: Page already defined")

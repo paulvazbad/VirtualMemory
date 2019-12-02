@@ -7,23 +7,27 @@ from Page import Page
 from Process import Process 
 
 #Global Variables
-
 M = [[-1,-1]]*128
 S = [[-1,-1]]*256
 lru = LRU()
 fifo = FIFO()
-global_time = 0
+global_time = 0     #in deciseconds for arithmetic purposes
 logs = []
+debug = False
+swaps = 0
 
 #Instances of process
 processes = {}
-algorithm = [fifo, lru]
 SIZE_OF_PAGE = 16
+
+#Algorithm
+algorithm = [fifo, lru]
 PAGE_REPLACEMENT_ALGORITHM = 0
 
 
 # Add the page to memory (swap or insert)
 def add_page_to_memory(new_process, page_number):
+    global global_time
     # Check available frames
     if memory_available(M) <= 0:
         # Swap
@@ -48,8 +52,12 @@ def add_page_to_memory(new_process, page_number):
             processes[new_process].table[page_number].frame = new_frame
             processes[new_process].table[page_number].bit_memory = 1
         algorithm[PAGE_REPLACEMENT_ALGORITHM].insert(new_process, page_number)
+    #adds 1 sec to global time for adding page to M
+    global_time += 10
 
 def swap(process_to_insert_ID, process_to_insert_page_number):
+    global global_time
+    global swaps
     #gets process to switch with
     process_to_switch_ID, process_to_switch_page_number =  algorithm[PAGE_REPLACEMENT_ALGORITHM].pop()
     S_frame = -1
@@ -81,57 +89,69 @@ def swap(process_to_insert_ID, process_to_insert_page_number):
     M[processes[process_to_insert_ID].table[process_to_insert_page_number].frame] = [process_to_insert_ID,process_to_insert_page_number]
     print("Página", process_to_insert_page_number, "del proceso", process_to_insert_ID, "swappeada al marco", processes[process_to_insert_ID].table[process_to_insert_page_number].frame, "del área real")
     print("Página", process_to_switch_page_number, "del proceso", process_to_switch_ID, "swappeada al marco", S_frame, "del área de swapping")
+    #adds 1 sec to global timer because of the extra operation of swapping out "process_to_switch"
+    processes[process_to_insert_ID].page_faults += 1
+    global_time += 10
+    swaps += 1
     
-
 # Ask for N-bytes in memory
-def P(number_of_bytes,process_id,time):
+def P(number_of_bytes, process_id):
     print("P", number_of_bytes, process_id)
     if(number_of_bytes > 2048):
-        raise Exception("Memory requested is too big, limit (2048)")
+        raise Exception("Proceso excede el limite de tamaño (2048 bytes)")
+    if(number_of_bytes > (memory_available(M) + memory_available(S))*16):
+        raise Exception("Memoria insuficiente; puede liberar espacio quitando un proceso.")
+    #Add process to list of processes
     number_of_pages  = math.ceil(number_of_bytes/SIZE_OF_PAGE) 
-    new_process = Process(process_id,number_of_bytes, time)
+    new_process = Process(process_id, number_of_bytes, global_time)
     processes[process_id] = new_process
     #Create each page for the process
     for i in range(0,number_of_pages):
-        add_page_to_memory(process_id,i)
-    #Add process to list of processes
-    processes[process_id] = new_process
-    print("Asks for memory")
+        add_page_to_memory(process_id, i)
+    print("Se agregaron", number_of_bytes, "bytes de memoria real al proceso", process_id)
+    if debug:
+        debug_status()
+    else:
+        print("Memory of process", process_id, ":")
+        processes[process_id].print_pages()
+        print()
 
 #Gets the real address of a page
 def A(virtual_address, process_ID, modify):
+    global global_time
     #Validates if virtual address exists
     if (virtual_address > processes[process_ID].size or virtual_address < 0):
-        raise Exception("The virual address is not valid.")
+        raise Exception("Dirección virtual no válida")
     print("A", virtual_address, process_ID, modify)
     #Gets page to execute
     page = processes[process_ID].table[int(virtual_address / SIZE_OF_PAGE)]
     if modify == 1:
         algorithm[PAGE_REPLACEMENT_ALGORITHM].touch(process_ID,page.ID)
-        print("Página", int(virtual_address / SIZE_OF_PAGE), "del proceso", process_ID, "modificada.")
+        print("Página", int(virtual_address / SIZE_OF_PAGE), "del proceso", process_ID, "modificada/ejecutada.")
     print("Dirección virtual:", virtual_address)
     #If page is already in M it only calculates the real address
     if page.bit_memory:
         print("Dirección real (M):", (page.frame * SIZE_OF_PAGE + virtual_address % SIZE_OF_PAGE))
+        global_time += 1
     #Page is on S, it has to be moved to M by swapping or directly putting it
     else:
-        processes[process_ID].page_faults += 1
-        print("Memoria en S:", page.frame)
-        #Swaps if there are no spaces available in M
-        if memory_available(M) == 0:
-            swap(process_ID, page.ID)
-        # Inserts directly into M
-        else:
-            add_page_to_memory(process_ID, page.ID)
+        if debug:
+            print("Fallo de página", process_ID, page.ID)
+        # Inserts page into M
+        add_page_to_memory(process_ID, page.ID)
         print("Dirección real (M):", (processes[process_ID].table[page.ID].frame * SIZE_OF_PAGE + virtual_address % SIZE_OF_PAGE))
-    return 0
+    if debug:
+        debug_status()
+    else:
+        print()
 
 #Frees all the pages of a process
 def L(process_id):
-    if not (process_id in processes):
-        raise Exception("Process id not found")
-    # Iterate in the process.table
     global global_time
+    print("L", process_id)
+    if not (process_id in processes):
+        raise Exception("Proceso no encontrado.")
+    # Iterate in the process.table
     reales_liberados = []
     swapping_liberados = []
     for page in processes[process_id].table.items():
@@ -146,17 +166,21 @@ def L(process_id):
             #Delete from S
             S[frame] = [-1, -1] 
             swapping_liberados.append(frame)
-        global_time += 0.1
+        global_time += 1
     if(len(reales_liberados)>0):
         print("Se liberan los marcos de memoria real:", reales_liberados)
     if(len(swapping_liberados)>0):
         print("Se liberan los marcos de swapping", swapping_liberados)
-    turnaround = global_time - processes[process_id].timestamp
+    turnaround = (global_time - processes[process_id].timestamp)/10
     #Add to logs the information regarding the process
-    log_string = "Process: " + str(process_id) +  "Turnaround: " + str(turnaround) + "Page faults: "+str(processes[process_id].page_faults)
+    log_string = "Proceso: " + str(process_id) +  " Turnaround: " + str(turnaround) + " Fallos de página: "+str(processes[process_id].page_faults)
     logs.append(log_string)
     # Delete process from list of processes
     del processes[process_id]
+    if debug:
+        debug_status()
+    else:
+        print()
 
 #Returns the number of non-zero elements in memory (# of pages)
 def memory_available(memory):
@@ -173,6 +197,8 @@ def F():
     global logs
     global processes
     global  SIZE_OF_PAGE
+    for process_id in list(processes):
+        L(processes[process_id].id)
     #Instances of process
     processes = {}
     SIZE_OF_PAGE = 16
@@ -184,17 +210,25 @@ def F():
     S = [[-1,-1]]*256
     global_time = 0
     logs = []
+    print("Programa reinicializado")
+    if debug:
+        debug_status()
+    else:
+        print()
 
+## Comentario
+def C(comment):
+    print(comment)
 
-##Read from file 
+## Read from file 
 
-def debug_status(process_id):
+## Debug display
+def debug_status():
     print("Memoria M:", memory_available(M))
     print(M)
     print("Memoria S:", memory_available(S))
     print(S)
     
-    if process_id in processes:
-        print("Process memory of", process_id, ":")
-        processes[process_id].print_pages()
-
+    for process in processes:
+        print("Memory of process", process.id, ":")
+        processes[process].print_pages()

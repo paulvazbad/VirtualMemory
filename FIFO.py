@@ -15,4 +15,4 @@ class FIFO():
         print(str(ele[0]) + " " + str(ele[1]))
 
     def touch(self,process_id,page_id):
-        print("The page has been used.")
+        return 0

@@ -17,7 +17,6 @@ class LRU():
         else:
             del self.list[i]
             self.insert(process_id,page_id)
-            print("The page has been used.")
     
     def pop(self):
         return self.list.pop()
