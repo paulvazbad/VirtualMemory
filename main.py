@@ -31,7 +31,7 @@ if f.mode == 'r':
                 break
         except:
             print("Comando no válido")
-            print()
+            print(line)
 f.close()
     
 
