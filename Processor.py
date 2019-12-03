@@ -1,28 +1,28 @@
-"""
-El procesador del programa que aplica el algoritmo de reemplazo de páginas.
 
-Atributos:
-- M: memoria real (128 páginas)
-- S: memoria de swapping (256 páginas)
-- lru, fifo: organizadores de prioridades de páginas
-- global time: tiempo de ejecución
-- 
+# El procesador del programa que aplica el algoritmo de reemplazo de páginas.
 
-Funciones de comandos:
-- C(comentario): imprime el comentario
-- P(tamaño, proceso): Cargar el proceso
-- A(dirección virtual, proceso, modificación): Obtener dirección real/modificar
-- L(proceso): Liberar memoria de un proceso en específico
-- F(): Reinicializa el programa y despliega las estadísticas del procesamiento
-- E(): Finalizar programa
+# Atributos:
+# - M: memoria real (128 páginas)
+# - S: memoria de swapping (256 páginas)
+# - lru, fifo: organizadores de prioridades de páginas
+# - global time: tiempo de ejecución
+# - 
 
-Funciones de apoyo:
-- add_page_to_memory(process, page)
-- swap: intercambia una página de la memoria S con una página de la memoria M
-- debug_status(): imprime el estatus de todos los atributos
-- processes: diccionario de procesos
-- algoritmo: lista de algoritmos de prioridad disponibles
-"""
+# Funciones de comandos:
+# - C(comentario): imprime el comentario
+# - P(tamaño, proceso): Cargar el proceso
+# - A(dirección virtual, proceso, modificación): Obtener dirección real/modificar
+# - L(proceso): Liberar memoria de un proceso en específico
+# - F(): Reinicializa el programa y despliega las estadísticas del procesamiento
+# - E(): Finalizar programa
+
+# Funciones de apoyo:
+# - add_page_to_memory(process, page)
+# - swap: intercambia una página de la memoria S con una página de la memoria M
+# - debug_status(): imprime el estatus de todos los atributos
+# - processes: diccionario de procesos
+# - algoritmo: lista de algoritmos de prioridad disponibles
+
 
 import collections
 import numpy as np
@@ -32,7 +32,7 @@ from FIFO import FIFO
 from Page import Page 
 from Process import Process 
 
-#Global Variables
+## Global Variables
 M = [[-1,-1]]*128
 S = [[-1,-1]]*256
 lru = LRU()

@@ -1,11 +1,11 @@
-"""
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Trabajo final SO
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Aurora Tijerina Berzosa     A01196690
-Paul Vazquez Badillo        A00819877
-Miguel Morales de la Vega	A00821541
-"""
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Trabajo final SO
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Aurora Tijerina Berzosa     A01196690
+# Paul Vazquez Badillo        A00819877
+# Miguel Morales de la Vega	A00821541
+
 
 import Processor as Processor
 
